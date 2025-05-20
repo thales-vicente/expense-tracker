@@ -253,6 +253,9 @@ class _HomePageState extends State<HomePage> {
           // TODO save to db
           await context.read<ExpenseDatabase>().createNewExpense(newExpense);
 
+          // TODO refresh graph
+          refreshGraphData();
+
           // TODO clear controllers
           nameController.clear();
           amountController.clear();
@@ -293,6 +296,9 @@ class _HomePageState extends State<HomePage> {
             existingId,
             updatedExpense,
           );
+
+          // TODO refresh graph
+          refreshGraphData();
         }
       },
       child: const Text("Save"),
@@ -308,6 +314,9 @@ class _HomePageState extends State<HomePage> {
 
         // TODO delete expense from db
         await context.read<ExpenseDatabase>().deleteExpense(id);
+
+        // TODO refresh graph
+        refreshGraphData();
       },
       child: const Text("Delete"),
     );
