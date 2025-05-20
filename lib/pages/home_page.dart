@@ -153,6 +153,7 @@ class _HomePageState extends State<HomePage> {
 
         // TODO return ui
         return Scaffold(
+          backgroundColor: Colors.grey.shade300,
           floatingActionButton: FloatingActionButton(
             onPressed: openNewExpenseBox,
             child: const Icon(Icons.add),
