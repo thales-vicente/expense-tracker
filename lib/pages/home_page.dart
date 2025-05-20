@@ -1,3 +1,4 @@
+import 'package:expense_tracker/components/my_list_title.dart';
 import 'package:expense_tracker/database/expense_database.dart';
 import 'package:expense_tracker/helper/helper_functions.dart';
 import 'package:expense_tracker/models/expense.dart';
@@ -72,9 +73,9 @@ class _HomePageState extends State<HomePage> {
                 Expense individualExpense = value.allExpense[index];
 
                 // TODO return list title UI
-                return ListTile(
-                  title: Text(individualExpense.name),
-                  trailing: Text(formatAmount(individualExpense.amount)),
+                return MyListTitle(
+                  title: individualExpense.name,
+                  trailing: formatAmount(individualExpense.amount),
                 );
               },
             ),
