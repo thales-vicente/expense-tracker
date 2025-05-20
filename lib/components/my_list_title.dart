@@ -24,13 +24,19 @@ class MyListTitle extends StatelessWidget {
           // TODO settings option
           SlidableAction(
               onPressed: onEditPressed,
-              icon: Icons.settings
+              icon: Icons.settings,
+            backgroundColor: Colors.grey,
+            foregroundColor: Colors.white,
+            borderRadius: BorderRadius.circular(4),
           ),
 
           // TODO delete option
           SlidableAction(
-              onPressed: onEditPressed,
+              onPressed: onDeletePressed,
               icon: Icons.delete,
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            borderRadius: BorderRadius.circular(4),
           ),
         ],
       ),
