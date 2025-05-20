@@ -1,3 +1,4 @@
+import 'package:expense_tracker/bar%20graph/bar_graph.dart';
 import 'package:expense_tracker/components/my_list_title.dart';
 import 'package:expense_tracker/database/expense_database.dart';
 import 'package:expense_tracker/helper/helper_functions.dart';
@@ -17,10 +18,27 @@ class _HomePageState extends State<HomePage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController amountController = TextEditingController();
 
+  // TODO futures to load graph data
+  Future<Map<int, double>>? _monthlyTotalsFuture;
+
   @override
   void initState() {
+    // TODO read db on initial startup
     Provider.of<ExpenseDatabase>(context, listen: false).readExpenses();
+
+    // TODO load futures
+    refreshGraphData();
+
     super.initState();
+  }
+
+  // TODO refresh graph data
+  void refreshGraphData() {
+    _monthlyTotalsFuture =
+        Provider.of<ExpenseDatabase>(
+          context,
+          listen: false,
+        ).calculateMonthlyTotals();
   }
 
   // TODO void open new expense box
@@ -116,28 +134,87 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseDatabase>(
-      builder:
-          (context, value, child) => Scaffold(
-            floatingActionButton: FloatingActionButton(
-              onPressed: openNewExpenseBox,
-              child: const Icon(Icons.add),
-            ),
-            body: ListView.builder(
-              itemCount: value.allExpense.length,
-              itemBuilder: (context, index) {
-                // TODO get individual expense
-                Expense individualExpense = value.allExpense[index];
+      builder: (context, value, child) {
+        // TODO get dates
+        int startMonth = value.getStartMonth();
+        int startYear = value.getStartYear();
+        int currentMonth = DateTime.now().month;
+        int currentYear = DateTime.now().year;
 
-                // TODO return list title UI
-                return MyListTitle(
-                  title: individualExpense.name,
-                  trailing: formatAmount(individualExpense.amount),
-                  onEditPressed: (context) => openEditBox(individualExpense),
-                  onDeletePressed: (context) => openDeleteBox(individualExpense),
-                );
-              },
+        // TODO calculate the number of months since the first month
+        int monthCount = calculateMonthCount(
+          startYear,
+          startMonth,
+          currentYear,
+          currentMonth,
+        );
+
+        // TODO only display the expenses for the current month
+
+        // TODO return ui
+        return Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: openNewExpenseBox,
+            child: const Icon(Icons.add),
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                // TODO graph ui
+                SizedBox(
+                  height: 250,
+                  child: FutureBuilder(
+                    future: _monthlyTotalsFuture,
+                    builder: (context, snapshot) {
+                      // TODO data is loaded
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        final monthlyTotals = snapshot.data ?? {};
+            
+                        // TODO create the list of monthly summary
+                        List<double> monthlySummary = List.generate(
+                          monthCount,
+                          (index) => monthlyTotals[startMonth + index] ?? 0.0,
+                        );
+                        return MyBarGraph(
+                          monthlySummary: monthlySummary,
+                          startMonth: startMonth,
+                        );
+                      }
+            
+                      // TODO loading..
+                      else {
+                        return const Center(
+                          child: Text("Loading.."),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                // TODO expense list UI
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: value.allExpense.length,
+                    itemBuilder: (context, index) {
+                      // TODO get individual expense
+                      Expense individualExpense = value.allExpense[index];
+            
+                      // TODO return list title UI
+                      return MyListTitle(
+                        title: individualExpense.name,
+                        trailing: formatAmount(individualExpense.amount),
+                        onEditPressed:
+                            (context) => openEditBox(individualExpense),
+                        onDeletePressed:
+                            (context) => openDeleteBox(individualExpense),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
+        );
+      },
     );
   }
 
