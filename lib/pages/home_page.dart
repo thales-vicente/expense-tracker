@@ -1,5 +1,8 @@
+import 'package:expense_tracker/database/expense_database.dart';
+import 'package:expense_tracker/helper/helper_functions.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,13 +16,18 @@ class _HomePageState extends State<HomePage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController amountController = TextEditingController();
 
+  @override
+  void initState() {
+    Provider.of<ExpenseDatabase>(context, listen: false).readExpenses();
+    super.initState();
+  }
+
   // TODO void open new expense box
   void openNewExpenseBox() {
     showDialog(
       context: context,
       builder:
-          (context) =>
-          AlertDialog(
+          (context) => AlertDialog(
             title: Text("New expense"),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -42,6 +50,7 @@ class _HomePageState extends State<HomePage> {
               _cancelButton(),
 
               // TODO save button
+              _createNewExpenseButton(),
             ],
           ),
     );
@@ -49,11 +58,27 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: openNewExpenseBox,
-        child: const Icon(Icons.add),
-      ),
+    return Consumer<ExpenseDatabase>(
+      builder:
+          (context, value, child) => Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: openNewExpenseBox,
+              child: const Icon(Icons.add),
+            ),
+            body: ListView.builder(
+              itemCount: value.allExpense.length,
+              itemBuilder: (context, index) {
+                // TODO get individual expense
+                Expense individualExpense = value.allExpense[index];
+
+                // TODO return list title UI
+                return ListTile(
+                  title: Text(individualExpense.name),
+                  trailing: Text(individualExpense.amount.toString()),
+                );
+              },
+            ),
+          ),
     );
   }
 
@@ -75,7 +100,7 @@ class _HomePageState extends State<HomePage> {
   // TODO save button -> Create new expense
   Widget _createNewExpenseButton() {
     return MaterialButton(
-      onPressed: () {
+      onPressed: () async {
         // TODO only save if there is something in the textfield to save
         if (nameController.text.isNotEmpty &&
             amountController.text.isNotEmpty) {
@@ -84,10 +109,17 @@ class _HomePageState extends State<HomePage> {
 
           // TODO create new expense
           Expense newExpense = Expense(
-              name: nameController.text,
-              amount: amountController.text,
-              date: DateTime.now(),
+            name: nameController.text,
+            amount: convertStringToDouble(amountController.text),
+            date: DateTime.now(),
           );
+
+          // TODO save to db
+          await context.read<ExpenseDatabase>().createNewExpense(newExpense);
+
+          // TODO clear controllers
+          nameController.clear();
+          amountController.clear();
         }
       },
       child: const Text('Save'),
