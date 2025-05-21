@@ -176,11 +176,20 @@ class _HomePageState extends State<HomePage> {
               builder: (context, snapshot) {
                 // TODO loaded
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return Text('\$' + snapshot.data!.toStringAsFixed(2));
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // TODO amount total
+                      Text('\$${snapshot.data!.toStringAsFixed(2)}'),
+
+                      // TODO month
+                      Text(getCurrentMonthName()),
+                    ],
+                  );
                 }
                 // TODO loading
                 else {
-                  return Text("loading..");
+                  return const Text("loading..");
                 }
               },
             ),
