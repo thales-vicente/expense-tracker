@@ -234,6 +234,9 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
+
+                const SizedBox(height: 25,),
+
                 // TODO expense list UI
                 Expanded(
                   child: ListView.builder(

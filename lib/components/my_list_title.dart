@@ -17,30 +17,41 @@ class MyListTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      endActionPane: ActionPane(
-        motion: const StretchMotion(),
-        children: [
-          // TODO settings option
-          SlidableAction(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 25),
+      child: Slidable(
+        endActionPane: ActionPane(
+          motion: const StretchMotion(),
+          children: [
+            // TODO settings option
+            SlidableAction(
               onPressed: onEditPressed,
               icon: Icons.settings,
-            backgroundColor: Colors.grey,
-            foregroundColor: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
+              backgroundColor: Colors.grey,
+              foregroundColor: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
 
-          // TODO delete option
-          SlidableAction(
+            // TODO delete option
+            SlidableAction(
               onPressed: onDeletePressed,
               icon: Icons.delete,
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            borderRadius: BorderRadius.circular(4),
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ],
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
+          child: ListTile(
+              title: Text(title),
+              trailing: Text(trailing)),
+        ),
       ),
-      child: ListTile(title: Text(title), trailing: Text(trailing)),
     );
   }
 }
