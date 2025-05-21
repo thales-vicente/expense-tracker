@@ -107,6 +107,27 @@ class ExpenseDatabase extends ChangeNotifier{
     return monthlyTotals;
   }
 
+  // TODO calculate current month total
+  Future<double> calculateCurrentMonthTotal() async {
+    // TODO ensure expenses are read from db first
+    await readExpenses();
+
+    // TODO get current month, year
+    int currentMonth = DateTime.now().month;
+    int currentYear = DateTime.now().year;
+
+    // TODO filter the expenses to include only those for this month this year
+    List<Expense> currentMonthExpenses = _allExpenses.where((expense) {
+      return expense.date.month == currentMonth &&
+      expense.date.year ==  currentYear;
+    }).toList();
+
+    // TODO calculate total amount for the current month
+    double total =
+        currentMonthExpenses.fold(0, (sum, expense) => sum + expense.amount);
+    return total;
+  }
+
   // TODO get start month
   int getStartMonth() {
     if(_allExpenses.isEmpty){

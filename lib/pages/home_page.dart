@@ -18,8 +18,9 @@ class _HomePageState extends State<HomePage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController amountController = TextEditingController();
 
-  // TODO futures to load graph data
+  // TODO futures to load graph data & monthly total
   Future<Map<int, double>>? _monthlyTotalsFuture;
+  Future<double>? _calculateCurrentMonthTotal;
 
   @override
   void initState() {
@@ -27,18 +28,23 @@ class _HomePageState extends State<HomePage> {
     Provider.of<ExpenseDatabase>(context, listen: false).readExpenses();
 
     // TODO load futures
-    refreshGraphData();
+    refreshData();
 
     super.initState();
   }
 
   // TODO refresh graph data
-  void refreshGraphData() {
+  void refreshData() {
     _monthlyTotalsFuture =
         Provider.of<ExpenseDatabase>(
           context,
           listen: false,
         ).calculateMonthlyTotals();
+    _calculateCurrentMonthTotal =
+        Provider.of<ExpenseDatabase>(
+          context,
+          listen: false,
+        ).calculateCurrentMonthTotal();
   }
 
   // TODO void open new expense box
@@ -150,6 +156,11 @@ class _HomePageState extends State<HomePage> {
         );
 
         // TODO only display the expenses for the current month
+        List<Expense> currentMonthExpenses =
+            value.allExpense.where((expense) {
+              return expense.date.year == currentYear &&
+                  expense.date.month == currentMonth;
+            }).toList();
 
         // TODO return ui
         return Scaffold(
@@ -157,6 +168,22 @@ class _HomePageState extends State<HomePage> {
           floatingActionButton: FloatingActionButton(
             onPressed: openNewExpenseBox,
             child: const Icon(Icons.add),
+          ),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: FutureBuilder<double>(
+              future: _calculateCurrentMonthTotal,
+              builder: (context, snapshot) {
+                // TODO loaded
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Text('\$' + snapshot.data!.toStringAsFixed(2));
+                }
+                // TODO loading
+                else {
+                  return Text("loading..");
+                }
+              },
+            ),
           ),
           body: SafeArea(
             child: Column(
@@ -170,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                       // TODO data is loaded
                       if (snapshot.connectionState == ConnectionState.done) {
                         final monthlyTotals = snapshot.data ?? {};
-            
+
                         // TODO create the list of monthly summary
                         List<double> monthlySummary = List.generate(
                           monthCount,
@@ -181,12 +208,9 @@ class _HomePageState extends State<HomePage> {
                           startMonth: startMonth,
                         );
                       }
-            
                       // TODO loading..
                       else {
-                        return const Center(
-                          child: Text("Loading.."),
-                        );
+                        return const Center(child: Text("Loading.."));
                       }
                     },
                   ),
@@ -194,11 +218,15 @@ class _HomePageState extends State<HomePage> {
                 // TODO expense list UI
                 Expanded(
                   child: ListView.builder(
-                    itemCount: value.allExpense.length,
+                    itemCount: currentMonthExpenses.length,
                     itemBuilder: (context, index) {
+                      // TODO reverse the index to show latest item first
+                      int reversedIndex =
+                          currentMonthExpenses.length - 1 - index;
+
                       // TODO get individual expense
-                      Expense individualExpense = value.allExpense[index];
-            
+                      Expense individualExpense = currentMonthExpenses[index];
+
                       // TODO return list title UI
                       return MyListTitle(
                         title: individualExpense.name,
@@ -255,7 +283,7 @@ class _HomePageState extends State<HomePage> {
           await context.read<ExpenseDatabase>().createNewExpense(newExpense);
 
           // TODO refresh graph
-          refreshGraphData();
+          refreshData();
 
           // TODO clear controllers
           nameController.clear();
@@ -299,7 +327,7 @@ class _HomePageState extends State<HomePage> {
           );
 
           // TODO refresh graph
-          refreshGraphData();
+          refreshData();
         }
       },
       child: const Text("Save"),
@@ -317,7 +345,7 @@ class _HomePageState extends State<HomePage> {
         await context.read<ExpenseDatabase>().deleteExpense(id);
 
         // TODO refresh graph
-        refreshGraphData();
+        refreshData();
       },
       child: const Text("Delete"),
     );
