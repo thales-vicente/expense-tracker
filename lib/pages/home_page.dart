@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   TextEditingController amountController = TextEditingController();
 
   // TODO futures to load graph data & monthly total
-  Future<Map<int, double>>? _monthlyTotalsFuture;
+  Future<Map<String, double>>? _monthlyTotalsFuture;
   Future<double>? _calculateCurrentMonthTotal;
 
   @override
@@ -205,12 +205,22 @@ class _HomePageState extends State<HomePage> {
                     builder: (context, snapshot) {
                       // TODO data is loaded
                       if (snapshot.connectionState == ConnectionState.done) {
-                        final monthlyTotals = snapshot.data ?? {};
+                        Map<String, double> monthlyTotals = snapshot.data ?? {};
 
                         // TODO create the list of monthly summary
                         List<double> monthlySummary = List.generate(
                           monthCount,
-                          (index) => monthlyTotals[startMonth + index] ?? 0.0,
+                          (index) {
+                            // TODO calculate year-month considering startMonth & index
+                            int year = startYear + (startMonth + index -1) ~/12;
+                            int month = (startMonth + index -1) %12 + 1;
+
+                            // TODO create the key in the format 'year-month'
+                            String yearMonthKey = '$year-$month';
+
+                            // TODO return the total for year-month or 0.0 if non-existent
+                            return monthlyTotals[yearMonthKey] ?? 0.0;
+                          }
                         );
                         return MyBarGraph(
                           monthlySummary: monthlySummary,

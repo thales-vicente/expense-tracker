@@ -20,6 +20,14 @@ class _MyBarGraphState extends State<MyBarGraph> {
   // TODO this list will hold the data for each bar
   List<IndividualBar> barData = [];
 
+  @override
+  void initState() {
+    super.initState();
+
+    // TODO we need to scroll to the latest month automatically
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) => scrollToEnd());
+  }
+
   // TODO initialize bar data - user our monthly summary to create a list of bars
   void initializeBarData() {
     barData = List.generate(
@@ -29,7 +37,7 @@ class _MyBarGraphState extends State<MyBarGraph> {
   }
 
   // TODO calculate max for upper limit of graph
-  double calculateMax(){
+  double calculateMax() {
     // TODO initially, set it at 500, but adjust if spending is pas this amount
     double max = 500;
 
@@ -38,10 +46,21 @@ class _MyBarGraphState extends State<MyBarGraph> {
     // TODO increase the upper limit by a bit
     max = widget.monthlySummary.last * 1.05;
 
-    if (max < 500){
+    if (max < 500) {
       return 500;
     }
     return max;
+  }
+
+  // TODO scroll controller to make sure it scrolls to the end / latest month
+  final ScrollController _scrollController = ScrollController();
+
+  void scrollToEnd() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(seconds: 1),
+      curve: Curves.fastOutSlowIn,
+    );
   }
 
   @override
@@ -55,11 +74,13 @@ class _MyBarGraphState extends State<MyBarGraph> {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      controller: _scrollController,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25.0),
         child: SizedBox(
           width:
-              barWidth * barData.length + spaceBetweenBars * (barData.length - 1),
+              barWidth * barData.length +
+              spaceBetweenBars * (barData.length - 1),
           child: BarChart(
             BarChartData(
               minY: 0,
@@ -68,8 +89,12 @@ class _MyBarGraphState extends State<MyBarGraph> {
               borderData: FlBorderData(show: false),
               titlesData: const FlTitlesData(
                 show: true,
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
                 rightTitles: AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
                 ),
